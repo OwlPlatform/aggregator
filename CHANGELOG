@@ -1,0 +1,24 @@
+                          Owl Platform Java Aggregator
+                                  Change Log
+Version 1.0.0
+Last updated June 16, 2012
+
+Project Website: <http://www.github.com/OwlPlatform/aggregator>
+
+Owl Platform Java Aggregator
+Copyright (C) 2012-2012 Robert Moore and the Owl Platform
+
+This application is free software according to the terms and conditions of
+the GNU General Purpose License, version 2.0 (or higher at your discretion).
+You should have received a copy of the GNU General Purpose License v2.0 along
+with this software as the file LICENSE.  If not, you may download a copy from
+<http://www.gnu.org/licenses/gpl-2.0.txt>.
+
+== About ==
+  The Owl Platform Java Aggregator (aggregator) is one of the primary
+  components of the system, providing aggregation and filtering of sensor
+  data streams.  Solvers are able to subscribe to sensor data through the
+  aggregator without worrying about the deployment details of the backing
+  sensor networks.
+
+Version 1.0.0 - TBD
