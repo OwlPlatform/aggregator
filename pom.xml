@@ -77,7 +77,7 @@
 					<archive>
 						<manifest>
 							<addClasspath>true</addClasspath>
-							<mainClass>org.grailrtls.aggregator.Aggregator</mainClass>
+							<mainClass>com.owlplatform.aggregator.Aggregator</mainClass>
 						</manifest>
 					</archive>
 				</configuration>
@@ -92,7 +92,7 @@
 					</descriptorRefs>
 					<archive>
 						<manifest>
-							<mainClass>org.grailrtls.aggregator.Aggregator</mainClass>
+							<mainClass>com.owlplatform.aggregator.Aggregator</mainClass>
 						</manifest>
 					</archive>
 				</configuration>
