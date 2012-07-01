@@ -80,7 +80,7 @@ public final class Aggregator implements SensorIoAdapter, SolverIoAdapter {
   /**
    * How long to wait before declaring a sensor conection "dead". Because there
    * is no heartbeat back to the sensors, idle status is the only way to know
-   * that they have disconnected.  The value is in seconds.
+   * that they have disconnected. The value is in seconds.
    */
   private static final int SENSOR_TIMEOUT = 600;
 
@@ -103,24 +103,18 @@ public final class Aggregator implements SensorIoAdapter, SolverIoAdapter {
   /**
    * Global variable to track average processing time for samples.
    */
-  private volatile long processingTime = 0;
+  volatile long processingTime = 0;
 
   /**
    * Global variable to track how long samples are queued before being sent to
    * solver buffers.
    */
-  private volatile long sampleDelay = 0;
+  volatile long sampleDelay = 0;
 
   /**
    * Global variable to track how many samples were processed.
    */
-  private volatile long numSamples = 0l;
-
-  /**
-   * How long to wait (in milliseconds) on sensor connections before closing
-   * them. Essentially a keep-alive period.
-   */
-  private long sensorTimeout = 5 * 60 * 1000;
+  volatile long numSamples = 0l;
 
   /**
    * Timer for printing statistics information to the log.
@@ -233,14 +227,17 @@ public final class Aggregator implements SensorIoAdapter, SolverIoAdapter {
 
     this.statsTimer.scheduleAtFixedRate(new TimerTask() {
 
+      private Logger timeLog = LoggerFactory.getLogger("Aggregator.statstimer");
+
       @Override
       public void run() {
         float avgProcTime = (float) Aggregator.this.processingTime
             / Aggregator.this.numSamples;
         float avgSampleTime = (float) Aggregator.this.sampleDelay
             / Aggregator.this.numSamples;
-        log.info(String.format(Aggregator.STATS_FORMAT_STRING,
-            Aggregator.this.numSamples, avgProcTime, avgSampleTime));
+        this.timeLog.info(String.format(Aggregator.STATS_FORMAT_STRING,
+            Long.valueOf(Aggregator.this.numSamples),
+            Float.valueOf(avgProcTime), Float.valueOf(avgSampleTime)));
         Aggregator.this.numSamples = 0L;
         Aggregator.this.processingTime = 0L;
         Aggregator.this.sampleDelay = 0L;
@@ -268,7 +265,7 @@ public final class Aggregator implements SensorIoAdapter, SolverIoAdapter {
           .getSensorListenPort()));
     } catch (IOException e) {
       log.error("Unable to bind to port {}.",
-          this.configuration.getSensorListenPort());
+          Integer.valueOf(this.configuration.getSensorListenPort()));
       System.exit(1);
     }
 
@@ -278,13 +275,13 @@ public final class Aggregator implements SensorIoAdapter, SolverIoAdapter {
           .getSolverListenPort()));
     } catch (IOException ioe) {
       log.error("Unable to bind to port {}.",
-          this.configuration.getSolverListenPort());
+          Integer.valueOf(this.configuration.getSolverListenPort()));
       System.exit(1);
     }
     log.info("GRAIL Aggregator is listening for sensors on on port {}.",
-        this.configuration.getSensorListenPort());
+        Integer.valueOf(this.configuration.getSensorListenPort()));
     log.info("GRAIL Aggregator is listening for solvers on on port {}.",
-        this.configuration.getSolverListenPort());
+        Integer.valueOf(this.configuration.getSolverListenPort()));
   }
 
   @Override
@@ -425,8 +422,7 @@ public final class Aggregator implements SensorIoAdapter, SolverIoAdapter {
     }
   }
 
-  public void sendSample(
-      final com.owlplatform.common.SampleMessage solverSample) {
+  public void sendSample(final com.owlplatform.common.SampleMessage solverSample) {
     for (CachingFilteringSolverInterface solver : this.solvers.values()) {
       solver.sendSample(solverSample);
     }
@@ -458,7 +454,8 @@ public final class Aggregator implements SensorIoAdapter, SolverIoAdapter {
     if (sensor == null) {
       return;
     }
-    log.warn("{} is idle for {} seconds. Disconnecting.", sensor, SENSOR_TIMEOUT);
+    log.warn("{} is idle for {} seconds. Disconnecting.", sensor,Integer.valueOf(
+        SENSOR_TIMEOUT));
     this.sensors.remove(sensor);
     sensor.session.close(true);
 

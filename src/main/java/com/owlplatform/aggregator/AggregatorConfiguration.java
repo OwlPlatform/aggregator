@@ -24,7 +24,7 @@ public class AggregatorConfiguration {
 	private int solverListenPort = Aggregator.SOLVER_LISTEN_PORT;
 	
 	public int getSolverListenPort() {
-		return solverListenPort;
+		return this.solverListenPort;
 	}
 
 	public void setSolverListenPort(int solverListenPort) {
@@ -32,7 +32,7 @@ public class AggregatorConfiguration {
 	}
 
 	public int getSensorListenPort() {
-		return sensorListenPort;
+		return this.sensorListenPort;
 	}
 
 	public void setSensorListenPort(int listenPort) {

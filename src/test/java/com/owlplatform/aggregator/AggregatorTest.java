@@ -99,7 +99,7 @@ public class AggregatorTest implements SampleListener, ConnectionListener,
 
 	@Test
 	public void throughputTest() {
-		log.info("Testing Aggregator throughput.");
+		this.log.info("Testing Aggregator throughput.");
 		
 
 		SampleMessage[] samples = new SampleMessage[THROUGHPUT_SAMPLES];
@@ -140,7 +140,7 @@ public class AggregatorTest implements SampleListener, ConnectionListener,
 			}
 		}
 
-		log.info("Sending " + samples.length + " samples.");
+		this.log.info("Sending " + samples.length + " samples.");
 
 		for (int i = 0; i < samples.length; ++i) {
 			SampleMessage s = samples[i];
@@ -157,26 +157,26 @@ public class AggregatorTest implements SampleListener, ConnectionListener,
 
 		try {
 			while(this.endReceive > (System.currentTimeMillis()-100)){
-			log.info("Sleeping to allow samples to issue.");
+			this.log.info("Sleeping to allow samples to issue.");
 			Thread.sleep(100);
 			}
 		} catch (InterruptedException ie) {
 
 		}
 
-		senseAgg.doConnectionTearDown();
-		solverAgg.doConnectionTearDown();
+		senseAgg.disconnect();
+		solverAgg.disconnect();
 
 		Assert.assertEquals("Didn't receive correct number of samples. Aggregator may be buffering too much.",samples.length, this.receivedSampleIndex);
-		long totalTime = endReceive - startReceive;
+		long totalTime = this.endReceive - this.startReceive;
 		float rate = (samples.length * 1000f) / totalTime;
-		log.info(String.format("Received %d samples in %d ms (%.2f S/s)\n",
-				samples.length, totalTime, rate));
+		this.log.info(String.format("Received %d samples in %d ms (%.2f S/s)\n",
+				Integer.valueOf(samples.length), Long.valueOf(totalTime), Float.valueOf(rate)));
 	}
 
 	@Test
 	public void filterTest() {
-		log.info("Testing Aggregator filtering.");
+		this.log.info("Testing Aggregator filtering.");
 
 		SampleMessage[] samples = new SampleMessage[FILTER_SAMPLES];
 		for (int i = 0; i < samples.length; ++i) {
@@ -228,7 +228,7 @@ public class AggregatorTest implements SampleListener, ConnectionListener,
 			}
 		}
 
-		log.info("Sending " + samples.length + " samples.");
+		this.log.info("Sending " + samples.length + " samples.");
 
 		for (int i = 0; i < samples.length; ++i) {
 			SampleMessage s = samples[i];
@@ -245,7 +245,7 @@ public class AggregatorTest implements SampleListener, ConnectionListener,
 
 		try {
 			while(this.endReceive > (System.currentTimeMillis()-100)){
-			log.info("Sleeping to allow samples to issue.");
+			this.log.info("Sleeping to allow samples to issue.");
 			Thread.sleep(100);
 			}
 		} catch (InterruptedException ie) {
@@ -256,9 +256,9 @@ public class AggregatorTest implements SampleListener, ConnectionListener,
 		solverAgg.doConnectionTearDown();
 
 		Assert.assertEquals("Didn't receive correct number of samples. Aggregator may be taking too long to process filters.",samples.length, this.receivedSampleIndex);
-		long totalTime = endReceive - startReceive;
+		long totalTime = this.endReceive - this.startReceive;
 		float rate = (samples.length * 1000f) / totalTime;
-		log.info(String.format("Received %d samples in %d ms (%.2f S/s)\n",
+		this.log.info(String.format("Received %d samples in %d ms (%.2f S/s)\n",
 				samples.length, totalTime, rate));
 	}
 
@@ -295,7 +295,7 @@ public class AggregatorTest implements SampleListener, ConnectionListener,
 
 	@Override
 	public void readyForSamples(SensorAggregatorInterface aggregator) {
-		log.info("Sensor connection ready.");
+		this.log.info("Sensor connection ready.");
 		this.readySensor = true;
 	}
 
@@ -320,7 +320,7 @@ public class AggregatorTest implements SampleListener, ConnectionListener,
 	@Override
 	public void subscriptionReceived(SolverAggregatorInterface aggregator,
 			SubscriptionMessage response) {
-		log.info("Solver connection ready.");
+		this.log.info("Solver connection ready.");
 		this.readySolver = true;
 	}
 

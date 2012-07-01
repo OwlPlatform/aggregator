@@ -72,16 +72,12 @@ public class CachingFilteringSolverInterface extends SolverInterface {
     }
 
     if (!this.sentSubscriptionResponse) {
-      log.warn(
-          "Unable to send {} before a subscription response is sent.",
-          sampleMessage);
       return false;
     }
 
     if (!this.hasEffectiveRules) {
       return super.sendSample(sampleMessage);
     }
-    log.debug("Checking rules for {}.", sampleMessage);
 
     HashableByteArray deviceHasher = new HashableByteArray(
         sampleMessage.getDeviceId());
@@ -116,7 +112,6 @@ public class CachingFilteringSolverInterface extends SolverInterface {
       return false;
     }
     if (cacheResult.isPassedRules()) {
-      log.debug("{} passed all rules (cache).", sampleMessage);
       long now = System.currentTimeMillis();
       long nextTransmit = cacheResult
           .getNextPermittedTransmit(sampleMessage.getReceiverId());
@@ -126,7 +121,6 @@ public class CachingFilteringSolverInterface extends SolverInterface {
             now + cacheResult.getUpdateInterval());
         return super.sendSample(sampleMessage);
       }
-      log.debug("Not able to send sample yet.");
       return false;
     }
 
@@ -135,7 +129,7 @@ public class CachingFilteringSolverInterface extends SolverInterface {
   }
 
   public Collection<SubscriptionRequestRule> getEffectiveRules() {
-    return effectiveRules;
+    return this.effectiveRules;
   }
 
   /**
