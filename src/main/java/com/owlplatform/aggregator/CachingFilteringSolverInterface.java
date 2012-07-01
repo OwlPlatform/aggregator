@@ -124,7 +124,6 @@ public class CachingFilteringSolverInterface extends SolverInterface {
       return false;
     }
 
-    // log.debug("{} failed one or more rules (cache).", sampleMessage);
     return false;
   }
 

@@ -94,11 +94,6 @@ public class SubscriptionRuleFilter {
 				boolean txerMatched = true;
 				for (int i = 0; i < deviceId.length; ++i) {
 					if ((deviceId[i] & mask[i]) != baseId[i]) {
-						log
-								.debug(
-										"Rule {}: DeviceId/Mask does not match BaseId at index {}.",
-										rule, i);
-						log.debug("Mask: " + NumericUtils.toHexString(mask[i]) + "Device: " + NumericUtils.toHexString(deviceId[i]) + " Base: " + NumericUtils.toHexString(baseId[i]));
 						txerMatched = false;
 						break;
 					}

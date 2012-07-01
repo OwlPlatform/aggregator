@@ -86,7 +86,6 @@ public class SolverInterface {
 		}
 		if (this.session.isConnected()) {
 			this.session.write(sampleMessage);
-			log.debug("Sent {}.", sampleMessage);
 			return true;
 		}
 		log.warn("Solver IoSession is not connected, cannot send sample.");

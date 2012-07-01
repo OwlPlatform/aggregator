@@ -296,7 +296,7 @@ public final class Aggregator implements SensorIoAdapter, SolverIoAdapter {
     // this.sensorSampleReceived.put(session,
     // Long.valueOf(System.currentTimeMillis()));
 
-    log.debug("Received handshake message from sensor {}.", session);
+    log.info("Received handshake message from sensor {}.", session);
     sensor.setReceivedHandshake(handshakeMessage);
 
     this.checkHandshakeMessages(sensor);
@@ -395,7 +395,7 @@ public final class Aggregator implements SensorIoAdapter, SolverIoAdapter {
     com.owlplatform.solver.protocol.messages.HandshakeMessage handshake = com.owlplatform.solver.protocol.messages.HandshakeMessage
         .getDefaultMessage();
     session.write(handshake);
-    log.debug("Sent {} to {}.", handshake, solver);
+    log.info("Sent {} to {}.", handshake, solver);
   }
 
   @Override
