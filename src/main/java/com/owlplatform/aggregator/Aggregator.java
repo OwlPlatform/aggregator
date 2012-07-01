@@ -69,7 +69,7 @@ public final class Aggregator implements SensorIoAdapter, SolverIoAdapter {
    */
   private static final String STATS_FORMAT_STRING = "Processed %d samples since last report.\n"
       + "Statistics\n"
-      + "\tAvg. Process Time: %1.3f ms\n"
+      + "\tAvg. Process Time: %,1.3f ns\n"
       + "\tAvg. Sample Lifetime: %1.3f ms";
 
   /**
@@ -344,12 +344,12 @@ public final class Aggregator implements SensorIoAdapter, SolverIoAdapter {
    */
   protected void handleSampleMessage(final IoSession session,
       final SampleMessage sampleMessage) {
-    long start = System.currentTimeMillis();
-
+    long start = System.nanoTime();
     this.sendSample(sampleMessage);
-    long now = System.currentTimeMillis();
-    this.processingTime += now - start;
-    this.sampleDelay += now - sampleMessage.getCreationTimestamp();
+    long nowNano = System.nanoTime();
+    long nowMilli = System.currentTimeMillis();
+    this.processingTime += nowNano - start;
+    this.sampleDelay += nowMilli - sampleMessage.getCreationTimestamp();
   }
 
   @Override
