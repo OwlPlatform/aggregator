@@ -16,6 +16,9 @@ DST_JAR_FILE="owl-aggregator.jar"
 DST_CONTROL_SCRIPT="owl-aggregator"
 DST_INIT_SCRIPT="owl-aggregator"
 
+# Create user if it doesn't exist
+useradd -c "Owl Platform" -M -s /usr/sbin/nologin -U $OWL_USER 
+
 # Create directories needed to run
 install -d -o $OWL_USER $INSTALL_DIR
 install -d -o $OWL_USER $LOG_DIR
