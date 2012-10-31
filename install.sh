@@ -19,10 +19,12 @@ DST_CONTROL_SCRIPT="owl-aggregator"
 DST_INIT_SCRIPT="owl-aggregator"
 
 if [ ! -e $SRC_JAR_DIR/$SRC_JAR_FILE ]; then
-  mv "$LOG4J_DEV_FILE" "$LOG4J_DEV_FILE.bkp"
-  cp "$LOG4J_FILE" "$LOG4J_DEV_FILE"
-  mvn clean package
-  mv "$LOG4J_DEV_FILE.bkp" "$LOG4J_DEV_FILE"
+  echo "Compiling aggregator using Apache Maven"
+  mv "$LOG4J_DEV_FILE" "$LOG4J_DEV_FILE.bkp" && \
+  cp "$LOG4J_FILE" "$LOG4J_DEV_FILE" && \
+  mvn clean package >/dev/null && \
+  mv "$LOG4J_DEV_FILE.bkp" "$LOG4J_DEV_FILE" || 
+  echo "Unable to compile the aggregator."
 fi
 
 # Create user if it doesn't exist
@@ -40,3 +42,7 @@ sudo install -o $OWL_USER $SRC_SCRIPT_DIR/$SRC_CONTROL_SCRIPT $INSTALL_DIR/$DST_
 sudo install $SRC_SCRIPT_DIR/$SRC_INIT_SCRIPT $INIT_DIR/$DST_INIT_SCRIPT
 
 sudo update-rc.d owl-aggregator defaults
+
+sudo service owl-aggregator restart
+
+echo "Installation complete."
