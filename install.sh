@@ -1,5 +1,6 @@
 #!/bin/bash
 
+OWL_USER=owl
 VERSION="1.0.0"
 
 SRC_JAR_DIR="target"
@@ -16,12 +17,12 @@ DST_CONTROL_SCRIPT="owl-aggregator"
 DST_INIT_SCRIPT="owl-aggregator"
 
 # Create directories needed to run
-mkdir -p $INSTALL_DIR
-mkdir -p $LOG_DIR
+install -d -o $OWL_USER $INSTALL_DIR
+install -d -o $OWL_USER $LOG_DIR
 
 # Executables
-install $SRC_JAR_DIR/$SRC_JAR_FILE $INSTALL_DIR/$DST_JAR_FILE
-install $SRC_SCRIPT_DIR/$SRC_CONTROL_SCRIPT $INSTALL_DIR/$DST_CONTROL_SCRIPT
+install -o $OWL_USER  $SRC_JAR_DIR/$SRC_JAR_FILE $INSTALL_DIR/$DST_JAR_FILE
+install -o $OWL_USER $SRC_SCRIPT_DIR/$SRC_CONTROL_SCRIPT $INSTALL_DIR/$DST_CONTROL_SCRIPT
 
 # Init service
 install $SRC_SCRIPT_DIR/$SRC_INIT_SCRIPT $INIT_DIR/$DST_INIT_SCRIPT
