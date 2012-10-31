@@ -28,7 +28,7 @@ if [ ! -e $SRC_JAR_DIR/$SRC_JAR_FILE ]; then
 fi
 
 # Create user if it doesn't exist
-sudo useradd -c "Owl Platform" -M -s /usr/sbin/nologin -U $OWL_USER 
+sudo /usr/sbin/useradd -c "Owl Platform" -M -s /usr/sbin/nologin -U $OWL_USER 
 
 # Create directories needed to run
 sudo install -d -o $OWL_USER $INSTALL_DIR
