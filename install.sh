@@ -16,6 +16,8 @@ DST_JAR_FILE="owl-aggregator.jar"
 DST_CONTROL_SCRIPT="owl-aggregator"
 DST_INIT_SCRIPT="owl-aggregator"
 
+[ -e $SRC_JAR_DIR/$SRC_JAR_FILE ] || mvn clean package
+
 # Create user if it doesn't exist
 useradd -c "Owl Platform" -M -s /usr/sbin/nologin -U $OWL_USER 
 
