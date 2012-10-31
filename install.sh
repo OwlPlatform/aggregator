@@ -8,6 +8,8 @@ SRC_JAR_FILE="owl-aggregator-$VERSION-SNAPSHOT-jar-with-dependencies.jar"
 SRC_SCRIPT_DIR="scripts"
 SRC_CONTROL_SCRIPT="owl-aggregator"
 SRC_INIT_SCRIPT="owl-aggregator.init"
+LOG4J_DEV_FILE="src/main/resources/log4j.xml"
+LOG4J_FILE="src/main/resources/log4j-install.xml"
 
 LOG_DIR="/var/log/owl"
 INSTALL_DIR="/usr/local/bin/owl"
@@ -16,20 +18,25 @@ DST_JAR_FILE="owl-aggregator.jar"
 DST_CONTROL_SCRIPT="owl-aggregator"
 DST_INIT_SCRIPT="owl-aggregator"
 
-[ -e $SRC_JAR_DIR/$SRC_JAR_FILE ] || mvn clean package
+if [ ! -e $SRC_JAR_DIR/$SRC_JAR_FILE ]; then
+  mv "$LOG4J_DEV_FILE" "$LOG4J_DEV_FILE.bkp"
+  cp "$LOG4J_FILE" "$LOG4J_DEV_FILE"
+  mvn clean package
+  mv "$LOG4J_DEV_FILE.bkp" "$LOG4J_DEV_FILE"
+fi
 
 # Create user if it doesn't exist
-useradd -c "Owl Platform" -M -s /usr/sbin/nologin -U $OWL_USER 
+sudo useradd -c "Owl Platform" -M -s /usr/sbin/nologin -U $OWL_USER 
 
 # Create directories needed to run
-install -d -o $OWL_USER $INSTALL_DIR
-install -d -o $OWL_USER $LOG_DIR
+sudo install -d -o $OWL_USER $INSTALL_DIR
+sudo install -d -o $OWL_USER $LOG_DIR
 
 # Executables
-install -o $OWL_USER  $SRC_JAR_DIR/$SRC_JAR_FILE $INSTALL_DIR/$DST_JAR_FILE
-install -o $OWL_USER $SRC_SCRIPT_DIR/$SRC_CONTROL_SCRIPT $INSTALL_DIR/$DST_CONTROL_SCRIPT
+sudo install -o $OWL_USER  $SRC_JAR_DIR/$SRC_JAR_FILE $INSTALL_DIR/$DST_JAR_FILE
+sudo install -o $OWL_USER $SRC_SCRIPT_DIR/$SRC_CONTROL_SCRIPT $INSTALL_DIR/$DST_CONTROL_SCRIPT
 
 # Init service
-install $SRC_SCRIPT_DIR/$SRC_INIT_SCRIPT $INIT_DIR/$DST_INIT_SCRIPT
+sudo install $SRC_SCRIPT_DIR/$SRC_INIT_SCRIPT $INIT_DIR/$DST_INIT_SCRIPT
 
-update-rc.d owl-aggregator defaults
+sudo update-rc.d owl-aggregator defaults
