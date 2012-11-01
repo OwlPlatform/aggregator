@@ -32,5 +32,5 @@ produce the executable JAR file:
 The output will be in the `target` subdirectory.  You can execute the JAR in
 the standard way:
 
-    java -jar target/owl-aggregator-1.0.0-SNAPSHOT-jar-with-dependencies.jar
+    java -jar target/owl-aggregator-1.0.0-jar-with-dependencies.jar
 
