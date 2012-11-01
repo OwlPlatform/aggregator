@@ -1,5 +1,5 @@
 # Owl Platform Aggregator #
-Version: 1.0.0-SNAPSHOT (Beta) <br />
+Version: 1.0.0<br />
 Author: Robert S. Moore
 
 ## Description ##
