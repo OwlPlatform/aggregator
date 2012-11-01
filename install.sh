@@ -4,7 +4,7 @@ OWL_USER=owl
 VERSION="1.0.0"
 
 SRC_JAR_DIR="target"
-SRC_JAR_FILE="owl-aggregator-$VERSION-SNAPSHOT-jar-with-dependencies.jar"
+SRC_JAR_FILE="owl-aggregator-$VERSION-jar-with-dependencies.jar"
 SRC_SCRIPT_DIR="scripts"
 SRC_CONTROL_SCRIPT="owl-aggregator"
 SRC_INIT_SCRIPT="owl-aggregator.init"
@@ -18,14 +18,13 @@ DST_JAR_FILE="owl-aggregator.jar"
 DST_CONTROL_SCRIPT="owl-aggregator"
 DST_INIT_SCRIPT="owl-aggregator"
 
-if [ ! -e $SRC_JAR_DIR/$SRC_JAR_FILE ]; then
-  echo "Compiling aggregator using Apache Maven"
-  mv "$LOG4J_DEV_FILE" "$LOG4J_DEV_FILE.bkp" && \
-  cp "$LOG4J_FILE" "$LOG4J_DEV_FILE" && \
-  mvn clean package >/dev/null && \
-  mv "$LOG4J_DEV_FILE.bkp" "$LOG4J_DEV_FILE" || 
-  echo "Unable to compile the aggregator."
-fi
+# Compile the code from source, make sure using lates log4j.xml
+echo "Compiling aggregator using Apache Maven"
+mv "$LOG4J_DEV_FILE" "$LOG4J_DEV_FILE.bkp" && \
+cp "$LOG4J_FILE" "$LOG4J_DEV_FILE" && \
+mvn clean package >/dev/null && \
+mv "$LOG4J_DEV_FILE.bkp" "$LOG4J_DEV_FILE" || 
+echo "Unable to compile the aggregator."
 
 # Create user if it doesn't exist
 sudo /usr/sbin/useradd -c "Owl Platform" -M -s /usr/sbin/nologin -U $OWL_USER 
