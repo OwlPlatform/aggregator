@@ -1,7 +1,7 @@
 #!/bin/bash
 
 OWL_USER=owl
-VERSION="1.0.0"
+VERSION="1.0.1"
 
 SRC_JAR_DIR="target"
 SRC_JAR_FILE="owl-aggregator-$VERSION-SNAPSHOT-jar-with-dependencies.jar"
