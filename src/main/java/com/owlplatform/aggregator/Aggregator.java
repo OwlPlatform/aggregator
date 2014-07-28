@@ -237,24 +237,28 @@ public final class Aggregator implements SensorIoAdapter, SolverIoAdapter {
 				float avgSampleTime = (float) Aggregator.this.sampleDelay
 						/ Aggregator.this.numSamples;
 				HashMap<IoSession, Integer> lostSamples = new HashMap<IoSession, Integer>();
-				for(IoSession sess : Aggregator.this.solvers.keySet()){
-					CachingFilteringSolverInterface solver = Aggregator.this.solvers.get(sess);
-					if(solver != null){
-						lostSamples.put(sess,Integer.valueOf(solver.getAndClearDroppedPackets()));
+				for (IoSession sess : Aggregator.this.solvers.keySet()) {
+					CachingFilteringSolverInterface solver = Aggregator.this.solvers
+							.get(sess);
+					if (solver != null) {
+						lostSamples.put(sess, Integer.valueOf(solver
+								.getAndClearDroppedPackets()));
 					}
 				}
-				
-				StringBuilder sb = new StringBuilder(String.format(Aggregator.STATS_FORMAT_STRING,
+
+				StringBuilder sb = new StringBuilder(String.format(
+						Aggregator.STATS_FORMAT_STRING,
 						Long.valueOf(Aggregator.this.numSamples),
 						Float.valueOf(avgProcTime),
 						Float.valueOf(avgSampleTime)));
-				if(!lostSamples.isEmpty()){
+				if (!lostSamples.isEmpty()) {
 					sb.append("\nSolver Loss Rate:");
-					for(IoSession sess : lostSamples.keySet()){
-						sb.append("\n\t").append(lostSamples.get(sess));
+					for (IoSession sess : lostSamples.keySet()) {
+						sb.append("\n\t").append(sess.toString()).append(": ")
+								.append(String.format("%,d",lostSamples.get(sess)));
 					}
 				}
-				
+
 				this.timeLog.info(sb.toString());
 				Aggregator.this.numSamples = 0L;
 				Aggregator.this.processingTime = 0L;
