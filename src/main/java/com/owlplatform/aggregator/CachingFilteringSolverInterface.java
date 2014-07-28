@@ -60,7 +60,7 @@ public class CachingFilteringSolverInterface extends SolverInterface {
     if (this.session.getScheduledWriteMessages() > SolverInterface.MAX_OUTSTANDING_SAMPLES) {
       if (!this.reportedDrop) {
         this.reportedDrop = true;
-        log.warn("Dropping a sample for {}", this);
+        log.debug("Dropping a sample for {}", this);
       }
       ++this.numDropped;
       return false;
