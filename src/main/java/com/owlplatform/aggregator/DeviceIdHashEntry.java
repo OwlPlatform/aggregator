@@ -29,9 +29,12 @@ public class DeviceIdHashEntry {
 
 	private long updateInterval = 0l;
 	
+	private int numAccess = 0;
+	
 	private ConcurrentHashMap<HashableByteArray, Long> nextPermittedTransmit = new ConcurrentHashMap<HashableByteArray, Long>();
 
 	public boolean isPassedRules() {
+		++this.numAccess;
 		return passedRules;
 	}
 
@@ -40,7 +43,12 @@ public class DeviceIdHashEntry {
 	}
 
 	public long getUpdateInterval() {
+		++this.numAccess;
 		return updateInterval;
+	}
+	
+	public int getNumAccess(){
+		return this.numAccess;
 	}
 
 	public void setUpdateInterval(long updateInterval) {
@@ -49,7 +57,7 @@ public class DeviceIdHashEntry {
 
 	public long getNextPermittedTransmit(byte[] receiverId) {
 		HashableByteArray hash = new HashableByteArray(receiverId);
-		
+		++this.numAccess;
 		Long nextTransmit = this.nextPermittedTransmit.get(hash);
 		if(nextTransmit == null)
 		{

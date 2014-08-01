@@ -69,8 +69,8 @@ public class AggregatorTest implements SampleListener, ConnectionListener,
 		AggregatorConfiguration config = new AggregatorConfiguration();
 		config.setSensorListenPort(SENSOR_PORT);
 		config.setSolverListenPort(SOLVER_PORT);
-		AggregatorTest.aggregator = new Aggregator();
-		AggregatorTest.aggregator.setConfig(config);
+		AggregatorTest.aggregator = new Aggregator(config);
+		
 
 		AggregatorTest.aggregator.init();
 		try {

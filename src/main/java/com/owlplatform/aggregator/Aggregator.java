@@ -87,7 +87,7 @@ public final class Aggregator implements SensorIoAdapter, SolverIoAdapter {
 	/**
 	 * Map of IoSessions to the solvers.
 	 */
-	private final ConcurrentHashMap<IoSession, CachingFilteringSolverInterface> solvers = new ConcurrentHashMap<IoSession, CachingFilteringSolverInterface>();
+	private final ConcurrentHashMap<IoSession, SolverInterface> solvers = new ConcurrentHashMap<IoSession, SolverInterface>();
 
 	/**
 	 * Map of IoSessions to the sensors.
@@ -132,6 +132,11 @@ public final class Aggregator implements SensorIoAdapter, SolverIoAdapter {
 	private final NioSocketAcceptor solverAcceptor;
 
 	/**
+	 * Flag to use solver rule caching or not.
+	 */
+	private final boolean useCache;
+
+	/**
 	 * Configuration values for this aggregator.
 	 */
 	private AggregatorConfiguration configuration;
@@ -158,25 +163,35 @@ public final class Aggregator implements SensorIoAdapter, SolverIoAdapter {
 	public static void main(String[] args) {
 		int sensorPort = SENSOR_LISTEN_PORT;
 		int solverPort = SOLVER_LISTEN_PORT;
+		boolean useCache = true;
 
-		if (args.length > 0) {
-			if ("-?".equalsIgnoreCase(args[0])) {
+		for (int i = 0; i < args.length; ++i) {
+
+			if ("-?".equalsIgnoreCase(args[i])) {
 				printConfigInfo();
 				return;
 			}
-			sensorPort = Integer.parseInt(args[0]);
-			if (args.length > 1) {
-				solverPort = Integer.parseInt(args[1]);
+			if ("-nc".equalsIgnoreCase(args[i])
+					|| "--nocache".equalsIgnoreCase(args[i])) {
+				useCache = true;
+			} else {
+				sensorPort = Integer.parseInt(args[i]);
+				++i;
+				if (args.length > i) {
+					solverPort = Integer.parseInt(args[i]);
+				}
 			}
+
 		}
 
 		// TODO: Remove this configuration set-up and load from disk
 		AggregatorConfiguration config = new AggregatorConfiguration();
 		config.setSensorListenPort(sensorPort);
 		config.setSolverListenPort(solverPort);
+		config.setUseCache(useCache);
 
-		Aggregator agg = new Aggregator();
-		agg.setConfig(config);
+		Aggregator agg = new Aggregator(config);
+
 		agg.init();
 
 	}
@@ -192,7 +207,8 @@ public final class Aggregator implements SensorIoAdapter, SolverIoAdapter {
 	/**
 	 * Constructs a new Aggregator object and adds a shutdown hook to it.
 	 */
-	public Aggregator() {
+	public Aggregator(final AggregatorConfiguration config) {
+		this.configuration = config;
 		Runtime.getRuntime().addShutdownHook(new Thread() {
 			@Override
 			public void run() {
@@ -200,21 +216,12 @@ public final class Aggregator implements SensorIoAdapter, SolverIoAdapter {
 			}
 		});
 
+		this.useCache = this.configuration.isUseCache();
+
 		this.sensorAcceptor = new NioSocketAcceptor();
 		this.sensorAcceptor.setReuseAddress(true);
 		this.solverAcceptor = new NioSocketAcceptor();
 		this.solverAcceptor.setReuseAddress(true);
-	}
-
-	/**
-	 * Sets the configuration values for this aggregator.
-	 * 
-	 * @param serverConfig
-	 *            the new configuration values for this aggregator. These are
-	 *            not used if {@link #init()} has already been invoked.
-	 */
-	public void setConfig(final AggregatorConfiguration serverConfig) {
-		this.configuration = serverConfig;
 	}
 
 	/**
@@ -238,7 +245,7 @@ public final class Aggregator implements SensorIoAdapter, SolverIoAdapter {
 						/ Aggregator.this.numSamples;
 				HashMap<IoSession, Integer> lostSamples = new HashMap<IoSession, Integer>();
 				for (IoSession sess : Aggregator.this.solvers.keySet()) {
-					CachingFilteringSolverInterface solver = Aggregator.this.solvers
+					SolverInterface solver = Aggregator.this.solvers
 							.get(sess);
 					if (solver != null) {
 						lostSamples.put(sess, Integer.valueOf(solver
@@ -254,8 +261,11 @@ public final class Aggregator implements SensorIoAdapter, SolverIoAdapter {
 				if (!lostSamples.isEmpty()) {
 					sb.append("\nSolver Loss Rate:");
 					for (IoSession sess : lostSamples.keySet()) {
-						sb.append("\n\t").append(sess.toString()).append(": ")
-								.append(String.format("%,d",lostSamples.get(sess)));
+						sb.append("\n\t")
+								.append(sess.toString())
+								.append(": ")
+								.append(String.format("%,d",
+										lostSamples.get(sess)));
 					}
 				}
 
@@ -413,7 +423,12 @@ public final class Aggregator implements SensorIoAdapter, SolverIoAdapter {
 
 	@Override
 	public void connectionOpened(final IoSession session) {
-		CachingFilteringSolverInterface solver = new CachingFilteringSolverInterface();
+		SolverInterface solver;
+		if(this.useCache){
+		solver = new CachingFilteringSolverInterface();
+		}else {
+			solver = new FilteringSolverInterface();
+		}
 		solver.setSession(session);
 		this.solvers.put(session, solver);
 		com.owlplatform.solver.protocol.messages.HandshakeMessage handshake = com.owlplatform.solver.protocol.messages.HandshakeMessage
@@ -430,7 +445,7 @@ public final class Aggregator implements SensorIoAdapter, SolverIoAdapter {
 	@Override
 	public void subscriptionRequestReceived(final IoSession session,
 			final SubscriptionMessage subscriptionRequestMessage) {
-		CachingFilteringSolverInterface solver = this.solvers.get(session);
+		SolverInterface solver = this.solvers.get(session);
 		subscriptionRequestMessage
 				.setMessageType(SubscriptionMessage.RESPONSE_MESSAGE_ID);
 		session.write(subscriptionRequestMessage);
@@ -448,8 +463,8 @@ public final class Aggregator implements SensorIoAdapter, SolverIoAdapter {
 	}
 
 	public void sendSample(
-			final com.owlplatform.common.SampleMessage solverSample) {
-		for (CachingFilteringSolverInterface solver : this.solvers.values()) {
+			final SampleMessage solverSample) {
+		for (SolverInterface solver : this.solvers.values()) {
 			solver.sendSample(solverSample);
 		}
 	}

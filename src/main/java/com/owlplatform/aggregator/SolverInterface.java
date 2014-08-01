@@ -20,11 +20,14 @@
 package com.owlplatform.aggregator;
 
 import org.apache.mina.core.session.IoSession;
+
 import com.owlplatform.common.SampleMessage;
+import com.owlplatform.solver.rules.SubscriptionRequestRule;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class SolverInterface {
+public abstract class SolverInterface {
 	private static final Logger log = LoggerFactory.getLogger(SolverInterface.class);
 
 	protected IoSession session;
@@ -46,6 +49,8 @@ public class SolverInterface {
 	public void setSentSubscriptionResponse(boolean sentSubscriptionResponse) {
 		this.sentSubscriptionResponse = sentSubscriptionResponse;
 	}
+	
+	public abstract void addEffectiveRule(SubscriptionRequestRule rule);
 
 	/**
 	 * @return the session
@@ -91,6 +96,8 @@ public class SolverInterface {
 		log.warn("Solver IoSession is not connected, cannot send sample.");
 		return false;
 	}
+	
+	public abstract int getAndClearDroppedPackets();
 	
 	@Override
 	public String toString()
