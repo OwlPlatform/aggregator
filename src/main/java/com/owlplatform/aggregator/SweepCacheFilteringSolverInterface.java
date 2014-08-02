@@ -77,7 +77,7 @@ public class SweepCacheFilteringSolverInterface extends SolverInterface {
 	private static final Logger log = LoggerFactory
 			.getLogger(SweepCacheFilteringSolverInterface.class);
 
-	private static final int MAX_DEVICES = 200;
+	private static final int MAX_DEVICES = 2000;
 
 	ConcurrentLinkedQueue<SubscriptionRequestRule> effectiveRules = new ConcurrentLinkedQueue<SubscriptionRequestRule>();
 
@@ -88,13 +88,13 @@ public class SweepCacheFilteringSolverInterface extends SolverInterface {
 
 	protected volatile boolean reportedDrop = false;
 
-	protected volatile AtomicInteger numDropped = new AtomicInteger(0);
+	protected volatile int numDropped = 0;
 
 	@Override
 	public synchronized boolean sendSample(SampleMessage sampleMessage) {
 
 		if (this.session.getScheduledWriteMessages() > SolverInterface.MAX_OUTSTANDING_SAMPLES) {
-			this.numDropped.incrementAndGet();
+			++this.numDropped;
 
 			return false;
 		}
@@ -180,8 +180,9 @@ public class SweepCacheFilteringSolverInterface extends SolverInterface {
 	}
 
 	public int getAndClearDroppedPackets() {
-
-		return this.numDropped.getAndSet(0);
+		final int num = this.numDropped;
+		this.numDropped = 0;
+		return num;
 	}
 
 	public void clearEffectiveRules() {
