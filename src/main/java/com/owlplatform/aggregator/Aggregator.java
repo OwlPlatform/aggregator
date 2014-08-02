@@ -427,9 +427,10 @@ public final class Aggregator implements SensorIoAdapter, SolverIoAdapter {
 	public void connectionOpened(final IoSession session) {
 		SolverInterface solver;
 		if(this.sweepCache){
-		solver = new CachingFilteringSolverInterface();
-		}else {
 			solver = new SweepCacheFilteringSolverInterface();
+		}else {
+			solver = new CachingFilteringSolverInterface();
+			
 		}
 		solver.setSession(session);
 		this.solvers.put(session, solver);
