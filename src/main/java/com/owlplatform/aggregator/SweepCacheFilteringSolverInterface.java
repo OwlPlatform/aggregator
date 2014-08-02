@@ -47,7 +47,7 @@ public class SweepCacheFilteringSolverInterface extends SolverInterface {
 
 	public SweepCacheFilteringSolverInterface() {
 
-		this.sweepTimer.schedule(new TimerTask() {
+		this.sweepTimer.scheduleAtFixedRate(new TimerTask() {
 
 			@Override
 			public void run() {
@@ -63,7 +63,7 @@ public class SweepCacheFilteringSolverInterface extends SolverInterface {
 				}
 				SweepCacheFilteringSolverInterface.log.info("Removed {} cache entries.",numSwept);
 			}
-		}, 5000);
+		}, 5000,5000);
 		Runtime.getRuntime().addShutdownHook(new Thread() {
 			public void run() {
 				SweepCacheFilteringSolverInterface.this.sweepTimer.cancel();
