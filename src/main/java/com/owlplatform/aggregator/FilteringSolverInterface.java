@@ -51,10 +51,17 @@ public class FilteringSolverInterface extends SolverInterface {
 
 			@Override
 			public void run() {
-				for (Iterator<HashableByteArray> iter = FilteringSolverInterface.this.ruleCache
-						.keySet().iterator(); iter.hasNext();) {
-					HashableByteArray devId = iter.next();
+				int numSwept = 0;
+				for (Iterator<Map.Entry<HashableByteArray,DeviceIdHashEntry>> iter = FilteringSolverInterface.this.ruleCache
+						.entrySet().iterator(); iter.hasNext();) {
+					Map.Entry<HashableByteArray,DeviceIdHashEntry> entry = iter.next();
+					DeviceIdHashEntry hash = entry.getValue();
+					if(hash.getNumAccess() < 2){
+						iter.remove();
+						++numSwept;
+					}
 				}
+				FilteringSolverInterface.log.info("Removed {} cache entries.",numSwept);
 			}
 		}, 5000);
 		Runtime.getRuntime().addShutdownHook(new Thread() {
