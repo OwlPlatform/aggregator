@@ -37,7 +37,7 @@ import com.owlplatform.common.util.HashableByteArray;
 import com.owlplatform.common.util.LRUCache;
 import com.owlplatform.solver.rules.SubscriptionRequestRule;
 
-public class FilteringSolverInterface extends SolverInterface {
+public class SweepCacheFilteringSolverInterface extends SolverInterface {
 
 	private final Timer sweepTimer = new Timer();
 
@@ -45,14 +45,14 @@ public class FilteringSolverInterface extends SolverInterface {
 		this.sweepTimer.cancel();
 	}
 
-	public FilteringSolverInterface() {
+	public SweepCacheFilteringSolverInterface() {
 
 		this.sweepTimer.schedule(new TimerTask() {
 
 			@Override
 			public void run() {
 				int numSwept = 0;
-				for (Iterator<Map.Entry<HashableByteArray,DeviceIdHashEntry>> iter = FilteringSolverInterface.this.ruleCache
+				for (Iterator<Map.Entry<HashableByteArray,DeviceIdHashEntry>> iter = SweepCacheFilteringSolverInterface.this.ruleCache
 						.entrySet().iterator(); iter.hasNext();) {
 					Map.Entry<HashableByteArray,DeviceIdHashEntry> entry = iter.next();
 					DeviceIdHashEntry hash = entry.getValue();
@@ -61,12 +61,12 @@ public class FilteringSolverInterface extends SolverInterface {
 						++numSwept;
 					}
 				}
-				FilteringSolverInterface.log.info("Removed {} cache entries.",numSwept);
+				SweepCacheFilteringSolverInterface.log.info("Removed {} cache entries.",numSwept);
 			}
 		}, 5000);
 		Runtime.getRuntime().addShutdownHook(new Thread() {
 			public void run() {
-				FilteringSolverInterface.this.sweepTimer.cancel();
+				SweepCacheFilteringSolverInterface.this.sweepTimer.cancel();
 			}
 		});
 	}
@@ -75,7 +75,7 @@ public class FilteringSolverInterface extends SolverInterface {
 	 * Logger for this class.
 	 */
 	private static final Logger log = LoggerFactory
-			.getLogger(FilteringSolverInterface.class);
+			.getLogger(SweepCacheFilteringSolverInterface.class);
 
 	private static final int MAX_DEVICES = 200;
 

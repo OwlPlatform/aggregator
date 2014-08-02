@@ -134,7 +134,7 @@ public final class Aggregator implements SensorIoAdapter, SolverIoAdapter {
 	/**
 	 * Flag to use solver rule caching or not.
 	 */
-	private final boolean useCache;
+	private final boolean sweepCache;
 
 	/**
 	 * Configuration values for this aggregator.
@@ -147,7 +147,8 @@ public final class Aggregator implements SensorIoAdapter, SolverIoAdapter {
 	private static final Logger log = LoggerFactory.getLogger(Aggregator.class);
 
 	private static final String CONFIG_INFO = "name: Aggregator" + "\n"
-			+ "arguments: sensor_port solver_port";
+			+ "arguments: sensor_port solver_port [-sc]"
+			+ "\n\t-sc: Use sweep-cache solver interface";
 
 	public static final void printConfigInfo() {
 		System.out.println(CONFIG_INFO);
@@ -171,8 +172,8 @@ public final class Aggregator implements SensorIoAdapter, SolverIoAdapter {
 				printConfigInfo();
 				return;
 			}
-			if ("-nc".equalsIgnoreCase(args[i])
-					|| "--nocache".equalsIgnoreCase(args[i])) {
+			if ("-sc".equalsIgnoreCase(args[i])
+					|| "--sweepcache".equalsIgnoreCase(args[i])) {
 				useCache = true;
 			} else {
 				sensorPort = Integer.parseInt(args[i]);
@@ -188,7 +189,7 @@ public final class Aggregator implements SensorIoAdapter, SolverIoAdapter {
 		AggregatorConfiguration config = new AggregatorConfiguration();
 		config.setSensorListenPort(sensorPort);
 		config.setSolverListenPort(solverPort);
-		config.setUseCache(useCache);
+		config.setUseSweepCache(useCache);
 
 		Aggregator agg = new Aggregator(config);
 
@@ -201,7 +202,8 @@ public final class Aggregator implements SensorIoAdapter, SolverIoAdapter {
 	 */
 	public static void printUsageInfo() {
 		System.out
-				.println("Accepts 4 optional parameters: <Sensor Port> <Solver Port> <Next Aggregator Host> <Next Aggregator Port>");
+				.println("Accepts 4 optional parameters: <Sensor Port> <Solver Port> [-sc]"
+						+"\n\t-sc: Use sweeping cache interface for solvers");
 	}
 
 	/**
@@ -216,7 +218,7 @@ public final class Aggregator implements SensorIoAdapter, SolverIoAdapter {
 			}
 		});
 
-		this.useCache = this.configuration.isUseCache();
+		this.sweepCache = this.configuration.isUseSweepCache();
 
 		this.sensorAcceptor = new NioSocketAcceptor();
 		this.sensorAcceptor.setReuseAddress(true);
@@ -424,10 +426,10 @@ public final class Aggregator implements SensorIoAdapter, SolverIoAdapter {
 	@Override
 	public void connectionOpened(final IoSession session) {
 		SolverInterface solver;
-		if(this.useCache){
+		if(this.sweepCache){
 		solver = new CachingFilteringSolverInterface();
 		}else {
-			solver = new FilteringSolverInterface();
+			solver = new SweepCacheFilteringSolverInterface();
 		}
 		solver.setSession(session);
 		this.solvers.put(session, solver);
