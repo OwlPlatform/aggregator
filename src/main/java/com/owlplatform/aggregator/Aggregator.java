@@ -280,7 +280,7 @@ public final class Aggregator implements SensorIoAdapter, SolverIoAdapter {
 					sb.append("\n\t")
 							.append(CachingFilteringSolverInterface.TIMING_NAMES[i])
 							.append(": ")
-							.append(String.format("%,9d ns", solvTimes[i]))
+							.append(String.format("%,13d ns", solvTimes[i])) // Handle up to single-digit seconds
 							.append(" | ")
 							.append(String.format("%,11d executions",solvTimes[i+halfLength]));
 				}
