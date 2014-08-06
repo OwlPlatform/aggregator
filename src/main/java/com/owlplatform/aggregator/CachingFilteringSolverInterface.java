@@ -23,6 +23,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Map;
 import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicIntegerArray;
 import java.util.concurrent.atomic.AtomicLongArray;
@@ -45,7 +46,7 @@ public class CachingFilteringSolverInterface extends SolverInterface {
 
 	private static final int MAX_DEVICES = 200;
 
-	ConcurrentLinkedQueue<SubscriptionRequestRule> effectiveRules = new ConcurrentLinkedQueue<SubscriptionRequestRule>();
+	CopyOnWriteArrayList<SubscriptionRequestRule> effectiveRules = new CopyOnWriteArrayList<SubscriptionRequestRule>();
 
 	Map<HashableByteArray, DeviceIdHashEntry> ruleCache = Collections
 			.synchronizedMap(new LRUCache<HashableByteArray, DeviceIdHashEntry>(
