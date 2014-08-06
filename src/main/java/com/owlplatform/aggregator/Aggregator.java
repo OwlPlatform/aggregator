@@ -282,7 +282,7 @@ public final class Aggregator implements SensorIoAdapter, SolverIoAdapter {
 							.append(": ")
 							.append(String.format("%,8d ns", solvTimes[i]))
 							.append(" | ")
-							.append(String.format("%,6d executions",solvTimes[i+halfLength]));
+							.append(String.format("%,11d executions",solvTimes[i+halfLength]));
 				}
 
 				this.timeLog.info(sb.toString());
