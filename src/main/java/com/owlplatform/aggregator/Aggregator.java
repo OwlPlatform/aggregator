@@ -164,7 +164,7 @@ public final class Aggregator implements SensorIoAdapter, SolverIoAdapter {
 	public static void main(String[] args) {
 		int sensorPort = SENSOR_LISTEN_PORT;
 		int solverPort = SOLVER_LISTEN_PORT;
-		boolean useCache = true;
+		boolean useCache = false;
 
 		for (int i = 0; i < args.length; ++i) {
 
@@ -175,6 +175,7 @@ public final class Aggregator implements SensorIoAdapter, SolverIoAdapter {
 			if ("-sc".equalsIgnoreCase(args[i])
 					|| "--sweepcache".equalsIgnoreCase(args[i])) {
 				useCache = true;
+				log.info("Using alternate/sweep Solver interface.");
 			} else {
 				sensorPort = Integer.parseInt(args[i]);
 				++i;
@@ -203,7 +204,7 @@ public final class Aggregator implements SensorIoAdapter, SolverIoAdapter {
 	public static void printUsageInfo() {
 		System.out
 				.println("Accepts 4 optional parameters: <Sensor Port> <Solver Port> [-sc]"
-						+"\n\t-sc: Use sweeping cache interface for solvers");
+						+ "\n\t-sc: Use sweeping cache interface for solvers");
 	}
 
 	/**
@@ -247,8 +248,7 @@ public final class Aggregator implements SensorIoAdapter, SolverIoAdapter {
 						/ Aggregator.this.numSamples;
 				HashMap<IoSession, Integer> lostSamples = new HashMap<IoSession, Integer>();
 				for (IoSession sess : Aggregator.this.solvers.keySet()) {
-					SolverInterface solver = Aggregator.this.solvers
-							.get(sess);
+					SolverInterface solver = Aggregator.this.solvers.get(sess);
 					if (solver != null) {
 						lostSamples.put(sess, Integer.valueOf(solver
 								.getAndClearDroppedPackets()));
@@ -269,6 +269,20 @@ public final class Aggregator implements SensorIoAdapter, SolverIoAdapter {
 								.append(String.format("%,d",
 										lostSamples.get(sess)));
 					}
+				}
+
+				// Solver stats
+				final long[] solvTimes = CachingFilteringSolverInterface
+						.getTiming();
+				sb.append("\nSolver Rule Delays:");
+				final int halfLength = solvTimes.length/2;
+				for (int i = 0; i < halfLength; ++i) {
+					sb.append("\n\t")
+							.append(CachingFilteringSolverInterface.TIMING_NAMES[i])
+							.append(": ")
+							.append(String.format("%,8d ns", solvTimes[i]))
+							.append(" | ")
+							.append(String.format("%,6d executions",solvTimes[i+halfLength]));
 				}
 
 				this.timeLog.info(sb.toString());
@@ -364,7 +378,6 @@ public final class Aggregator implements SensorIoAdapter, SolverIoAdapter {
 			final SampleMessage sampleMessage) {
 		++this.numSamples;
 		this.handlerPool.execute(new Runnable() {
-
 			@Override
 			public void run() {
 				Aggregator.this.handleSampleMessage(session, sampleMessage);
@@ -426,11 +439,11 @@ public final class Aggregator implements SensorIoAdapter, SolverIoAdapter {
 	@Override
 	public void connectionOpened(final IoSession session) {
 		SolverInterface solver;
-		if(this.sweepCache){
+		if (this.sweepCache) {
 			solver = new SweepCacheFilteringSolverInterface();
-		}else {
+		} else {
 			solver = new CachingFilteringSolverInterface();
-			
+
 		}
 		solver.setSession(session);
 		this.solvers.put(session, solver);
@@ -465,8 +478,7 @@ public final class Aggregator implements SensorIoAdapter, SolverIoAdapter {
 		}
 	}
 
-	public void sendSample(
-			final SampleMessage solverSample) {
+	public void sendSample(final SampleMessage solverSample) {
 		for (SolverInterface solver : this.solvers.values()) {
 			solver.sendSample(solverSample);
 		}

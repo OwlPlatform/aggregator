@@ -22,7 +22,7 @@ package com.owlplatform.aggregator;
 public class AggregatorConfiguration {
 	private int sensorListenPort = Aggregator.SENSOR_LISTEN_PORT;
 	private int solverListenPort = Aggregator.SOLVER_LISTEN_PORT;
-	private boolean useSweepCache = true;
+	private boolean useSweepCache = false;
 	
 	public int getSolverListenPort() {
 		return this.solverListenPort;
