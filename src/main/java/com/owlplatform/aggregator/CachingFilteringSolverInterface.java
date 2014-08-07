@@ -162,34 +162,34 @@ public class CachingFilteringSolverInterface extends SolverInterface {
 			counts.addAndGet(3,1);
 			
 			// Time to check all rules
-			if(times[2] != 0){
+			if(times[4] != 0){
 				timing.addAndGet(4,times[4]-times[3]);
 				counts.addAndGet(4,1);
 			}
 			// Time to create a cache entry (success) and update
-			if(times[3] != 0){
+			if(times[5] != 0){
 				timing.addAndGet(5,times[5]-times[4]);
 				counts.addAndGet(5, 1);
 			}
 			
 			// Time to create a cache entry (failure) and update
-			if(times[4] != 0){
+			if(times[6] != 0){
 				timing.addAndGet(6,times[6]-times[4]);
 				counts.addAndGet(6, 1);
 			}
 			// Cache hit
-			if(times[5] != 0){
+			if(times[7] != 0){
 				timing.addAndGet(7,times[7]-times[3]);
 				counts.addAndGet(7, 1);
 			}
 			
 			//  Can send sample based on update interval
-			if(times[6] != 0){
+			if(times[8] != 0){
 				timing.addAndGet(8,times[8]-times[7]);
 				counts.addAndGet(8,1);
 			}
 			// Cannot send sample based on update interval
-			if(times[7] != 0){
+			if(times[9] != 0){
 				timing.addAndGet(9,times[9]-times[7]);
 				counts.addAndGet(9,1);
 			}

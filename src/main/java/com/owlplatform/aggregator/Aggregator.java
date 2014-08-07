@@ -101,7 +101,7 @@ public final class Aggregator implements SensorIoAdapter, SolverIoAdapter {
 	 * Worker threads to process samples that have arrived from sensors.
 	 */
 	private final ExecutorService handlerPool = Executors
-			.newFixedThreadPool(Runtime.getRuntime().availableProcessors() * 2);
+			.newFixedThreadPool(Math.max(1,Runtime.getRuntime().availableProcessors()/2));
 
 	/**
 	 * Global variable to track average processing time for samples.
