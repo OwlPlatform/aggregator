@@ -44,13 +44,13 @@ public class CachingFilteringSolverInterface extends SolverInterface {
 	private static final Logger log = LoggerFactory
 			.getLogger(CachingFilteringSolverInterface.class);
 
-	private static final int MAX_DEVICES = 200;
+	private static final int MAX_CACHE_SIZE = 2000;
 
 	CopyOnWriteArrayList<SubscriptionRequestRule> effectiveRules = new CopyOnWriteArrayList<SubscriptionRequestRule>();
 
 	Map<HashableByteArray, DeviceIdHashEntry> ruleCache = Collections
-			.synchronizedMap(new LRUCache<HashableByteArray, DeviceIdHashEntry>(
-					MAX_DEVICES));
+			.synchronizedMap(new AdaptiveLRUCache<HashableByteArray, DeviceIdHashEntry>(
+					MAX_CACHE_SIZE/10,MAX_CACHE_SIZE));
 
 	protected boolean hasEffectiveRules = false;
 
