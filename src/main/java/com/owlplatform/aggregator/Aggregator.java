@@ -403,7 +403,6 @@ public final class Aggregator implements SensorIoAdapter, SolverIoAdapter {
 	@Override
 	public void sensorSampleReceived(final IoSession session,
 			final SampleMessage sampleMessage) {
-		++this.numSamples;
 		this.handlerPool
 				.execute(new SampleHandler(session, sampleMessage, this));
 
