@@ -191,6 +191,7 @@ public class CachingFilteringSolverInterface extends SolverInterface {
 				for(int i = 0; i < times.length; ++i){
 					sb.append("\n").append(TIMING_NAMES[i]).append(String.format(": %,11d",times[i]-startTiming));
 				}
+				log.warn(sb.toString());
 			}
 			
 		}
