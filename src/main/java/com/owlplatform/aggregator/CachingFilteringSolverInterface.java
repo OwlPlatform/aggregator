@@ -149,7 +149,7 @@ public class CachingFilteringSolverInterface extends SolverInterface {
 				return false;
 			}
 		} finally {
-			final long doneProc = System.nanoTime();
+			//final long doneProc = System.nanoTime();
 			// Compute timing
 			// These 4 execute every time
 			timing.addAndGet(0, times[0]-startTiming);	// Time to check session buffer
@@ -193,6 +193,7 @@ public class CachingFilteringSolverInterface extends SolverInterface {
 				timing.addAndGet(9,times[9]-times[7]);
 				counts.addAndGet(9,1);
 			}
+			/*
 			// Greater than 50 microsecond
 			if(doneProc - startTiming > 500000){
 				StringBuilder sb = new StringBuilder();
@@ -201,6 +202,7 @@ public class CachingFilteringSolverInterface extends SolverInterface {
 				}
 				log.warn(sb.toString());
 			}
+			*/
 			
 		}
 
