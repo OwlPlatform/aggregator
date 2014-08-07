@@ -186,7 +186,7 @@ public class CachingFilteringSolverInterface extends SolverInterface {
 				counts.addAndGet(7,1);
 			}
 			// Greater than 50 microsecond
-			if(times[7] - startTiming > 50000){
+			if(System.nanoTime() - startTiming > 50000){
 				StringBuilder sb = new StringBuilder();
 				for(int i = 0; i < times.length; ++i){
 					sb.append("\n").append(TIMING_NAMES[i]).append(String.format(": %,11d",times[i]-startTiming));
