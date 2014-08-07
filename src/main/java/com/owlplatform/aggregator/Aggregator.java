@@ -101,7 +101,8 @@ public final class Aggregator implements SensorIoAdapter, SolverIoAdapter {
 	 * Worker threads to process samples that have arrived from sensors.
 	 */
 	private final ExecutorService handlerPool = Executors
-			.newFixedThreadPool(Math.max(1,Runtime.getRuntime().availableProcessors()-1));
+			.newFixedThreadPool(Math.max(1, Runtime.getRuntime()
+					.availableProcessors() - 1));
 
 	/**
 	 * Global variable to track average processing time for samples.
@@ -381,16 +382,30 @@ public final class Aggregator implements SensorIoAdapter, SolverIoAdapter {
 		return true;
 	}
 
+	private static final class SampleHandler implements Runnable {
+		private final SampleMessage msg;
+		private final Aggregator agg;
+		private final IoSession sess;
+
+		public SampleHandler(final IoSession session,
+				final SampleMessage sampleMessage, final Aggregator agg) {
+			this.sess = session;
+			this.msg = sampleMessage;
+			this.agg = agg;
+		}
+		@Override
+		public void run() {
+			++this.agg.numSamples;
+			this.agg.handleSampleMessage(this.sess, this.msg);
+		}
+	}
+
 	@Override
 	public void sensorSampleReceived(final IoSession session,
 			final SampleMessage sampleMessage) {
 		++this.numSamples;
-		this.handlerPool.execute(new Runnable() {
-			@Override
-			public void run() {
-				Aggregator.this.handleSampleMessage(session, sampleMessage);
-			}
-		});
+		this.handlerPool
+				.execute(new SampleHandler(session, sampleMessage, this));
 
 	}
 
@@ -400,10 +415,10 @@ public final class Aggregator implements SensorIoAdapter, SolverIoAdapter {
 	 */
 	protected void handleSampleMessage(final IoSession session,
 			final SampleMessage sampleMessage) {
-		long start = System.nanoTime();
+		final long start = System.nanoTime();
 		this.sendSample(sampleMessage);
-		long nowNano = System.nanoTime();
-		long nowMilli = System.currentTimeMillis();
+		final long nowNano = System.nanoTime();
+		final long nowMilli = System.currentTimeMillis();
 		this.processingTime += nowNano - start;
 		this.sampleDelay += nowMilli - sampleMessage.getCreationTimestamp();
 	}
