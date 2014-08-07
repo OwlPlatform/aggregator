@@ -58,9 +58,11 @@ public class CachingFilteringSolverInterface extends SolverInterface {
 
 	protected volatile AtomicInteger numDropped = new AtomicInteger(0);
 	
-	static final AtomicLongArray timing = new AtomicLongArray(8);
+	static final AtomicLongArray timing = new AtomicLongArray(10);
 	static final AtomicIntegerArray counts = new AtomicIntegerArray(timing.length());
 	public static final String[] TIMING_NAMES = {
+		"SESS CHECK ",
+		"SHORT CHECK",
 		"HASH ID    ",
 		"CACHE GET  ",
 		"RULE CHECK ",
@@ -72,11 +74,13 @@ public class CachingFilteringSolverInterface extends SolverInterface {
 
 	@Override
 	public synchronized boolean sendSample(SampleMessage sampleMessage) {
-
+		final long startTiming = System.nanoTime(); 
 		if (this.session.getScheduledWriteMessages() > SolverInterface.MAX_OUTSTANDING_SAMPLES) {
 			this.numDropped.incrementAndGet();
 			return false;
 		}
+		final long[] times = new long[10];
+		times[0] = System.nanoTime();
 
 		if (!this.sentSubscriptionResponse) {
 			return false;
@@ -85,19 +89,19 @@ public class CachingFilteringSolverInterface extends SolverInterface {
 		if (!this.hasEffectiveRules) {
 			return super.sendSample(sampleMessage);
 		}
-		final long[] times = new long[8];
-		final long startTiming = System.nanoTime();
+		times[1] = System.nanoTime();
+		
 		try {
 			
 
 			HashableByteArray deviceHasher = new HashableByteArray(
 					sampleMessage.getDeviceId());
 
-			times[0] = System.nanoTime();
+			times[2] = System.nanoTime();
 
 			DeviceIdHashEntry cacheResult = this.ruleCache.get(deviceHasher);
 
-			times[1] = System.nanoTime();
+			times[3] = System.nanoTime();
 
 			if (cacheResult == null) {
 				SubscriptionRequestRule passedRule = null;
@@ -108,7 +112,7 @@ public class CachingFilteringSolverInterface extends SolverInterface {
 						break;
 					}
 				}
-				times[2] = System.nanoTime();
+				times[4] = System.nanoTime();
 
 				if (passedRule != null) {
 					log.debug("{} passed all rules.", sampleMessage);
@@ -120,16 +124,16 @@ public class CachingFilteringSolverInterface extends SolverInterface {
 							System.currentTimeMillis()
 									+ passedRule.getUpdateInterval());
 					this.ruleCache.put(deviceHasher, hashEntry);
-					times[3] = System.nanoTime();
+					times[5] = System.nanoTime();
 					return super.sendSample(sampleMessage);
 				}
 				DeviceIdHashEntry hashEntry = new DeviceIdHashEntry();
 				hashEntry.setPassedRules(false);
 				this.ruleCache.put(deviceHasher, hashEntry);
-				times[4] = System.nanoTime();
+				times[6] = System.nanoTime();
 				return false;
 			}
-			times[5] = System.nanoTime();
+			times[7] = System.nanoTime();
 			if (cacheResult.isPassedRules()) {
 				long now = System.currentTimeMillis();
 				long nextTransmit = cacheResult
@@ -138,52 +142,56 @@ public class CachingFilteringSolverInterface extends SolverInterface {
 					cacheResult.setNextPermittedTransmit(
 							sampleMessage.getReceiverId(),
 							now + cacheResult.getUpdateInterval());
-					times[6] = System.nanoTime();
+					times[8] = System.nanoTime();
 					return super.sendSample(sampleMessage);
 				}
-				times[7] = System.nanoTime();
+				times[9] = System.nanoTime();
 				return false;
 			}
 		} finally {
 			
 			// Compute timing
-			// These 2 execute every time
-			timing.addAndGet(0, times[0]-startTiming);	// Time to hash ID
+			// These 4 execute every time
+			timing.addAndGet(0, times[0]-startTiming);	// Time to check session buffer
 			counts.addAndGet(0, 1);
-			timing.addAndGet(1,times[1]-times[0]);		// Time to retrieve cache
+			timing.addAndGet(1,times[1]-times[0]);		// Time to check shortcuts
 			counts.addAndGet(1,1);
+			timing.addAndGet(2, times[2]-times[1]);	// Time to hash ID
+			counts.addAndGet(2, 1);
+			timing.addAndGet(3,times[3]-times[2]);		// Time to retrieve cache
+			counts.addAndGet(3,1);
 			
 			// Time to check all rules
 			if(times[2] != 0){
-				timing.addAndGet(2,times[2]-times[1]);
-				counts.addAndGet(2,1);
+				timing.addAndGet(4,times[4]-times[3]);
+				counts.addAndGet(4,1);
 			}
 			// Time to create a cache entry (success) and update
 			if(times[3] != 0){
-				timing.addAndGet(3,times[3]-times[2]);
-				counts.addAndGet(3, 1);
+				timing.addAndGet(5,times[5]-times[4]);
+				counts.addAndGet(5, 1);
 			}
 			
 			// Time to create a cache entry (failure) and update
 			if(times[4] != 0){
-				timing.addAndGet(4,times[4]-times[2]);
-				counts.addAndGet(4, 1);
+				timing.addAndGet(6,times[6]-times[4]);
+				counts.addAndGet(6, 1);
 			}
 			// Cache hit
 			if(times[5] != 0){
-				timing.addAndGet(5,times[5]-times[1]);
-				counts.addAndGet(5, 1);
+				timing.addAndGet(7,times[7]-times[3]);
+				counts.addAndGet(7, 1);
 			}
 			
 			//  Can send sample based on update interval
 			if(times[6] != 0){
-				timing.addAndGet(6,times[6]-times[5]);
-				counts.addAndGet(6,1);
+				timing.addAndGet(8,times[8]-times[7]);
+				counts.addAndGet(8,1);
 			}
 			// Cannot send sample based on update interval
 			if(times[7] != 0){
-				timing.addAndGet(7,times[7]-times[5]);
-				counts.addAndGet(7,1);
+				timing.addAndGet(9,times[9]-times[7]);
+				counts.addAndGet(9,1);
 			}
 			// Greater than 50 microsecond
 			if(System.nanoTime() - startTiming > 50000){

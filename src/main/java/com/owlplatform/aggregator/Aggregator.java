@@ -492,11 +492,12 @@ public final class Aggregator implements SensorIoAdapter, SolverIoAdapter {
 	}
 
 	public void sendSample(final SampleMessage solverSample) {
+		final long start = System.nanoTime();
 		for (SolverInterface solver : this.solverList) {
-
 			solver.sendSample(solverSample);
 
 		}
+		final long end = System.nanoTime();
 	}
 
 	@Override
