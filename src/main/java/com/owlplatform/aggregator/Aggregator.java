@@ -25,6 +25,7 @@ import java.util.HashMap;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -88,6 +89,8 @@ public final class Aggregator implements SensorIoAdapter, SolverIoAdapter {
 	 * Map of IoSessions to the solvers.
 	 */
 	private final ConcurrentHashMap<IoSession, SolverInterface> solvers = new ConcurrentHashMap<IoSession, SolverInterface>();
+
+	private final CopyOnWriteArraySet<SolverInterface> solverList = new CopyOnWriteArraySet<SolverInterface>();
 
 	/**
 	 * Map of IoSessions to the sensors.
@@ -275,14 +278,19 @@ public final class Aggregator implements SensorIoAdapter, SolverIoAdapter {
 				final long[] solvTimes = CachingFilteringSolverInterface
 						.getTiming();
 				sb.append("\nSolver Rule Delays:");
-				final int halfLength = solvTimes.length/2;
+				final int halfLength = solvTimes.length / 2;
 				for (int i = 0; i < halfLength; ++i) {
 					sb.append("\n\t")
 							.append(CachingFilteringSolverInterface.TIMING_NAMES[i])
 							.append(": ")
-							.append(String.format("%,13d ns", solvTimes[i])) // Handle up to single-digit seconds
+							.append(String.format("%,13d ns", solvTimes[i])) // Handle
+																				// up
+																				// to
+																				// single-digit
+																				// seconds
 							.append(" | ")
-							.append(String.format("%,11d executions",solvTimes[i+halfLength]));
+							.append(String.format("%,11d executions",
+									solvTimes[i + halfLength]));
 				}
 
 				this.timeLog.info(sb.toString());
@@ -447,6 +455,7 @@ public final class Aggregator implements SensorIoAdapter, SolverIoAdapter {
 		}
 		solver.setSession(session);
 		this.solvers.put(session, solver);
+		this.solverList.add(solver);
 		com.owlplatform.solver.protocol.messages.HandshakeMessage handshake = com.owlplatform.solver.protocol.messages.HandshakeMessage
 				.getDefaultMessage();
 		session.write(handshake);
@@ -455,6 +464,10 @@ public final class Aggregator implements SensorIoAdapter, SolverIoAdapter {
 
 	@Override
 	public void connectionClosed(final IoSession session) {
+		final SolverInterface solver = this.solvers.get(session);
+		if (solver != null) {
+			this.solverList.remove(solver);
+		}
 		this.solvers.remove(session);
 	}
 
@@ -479,8 +492,10 @@ public final class Aggregator implements SensorIoAdapter, SolverIoAdapter {
 	}
 
 	public void sendSample(final SampleMessage solverSample) {
-		for (SolverInterface solver : this.solvers.values()) {
+		for (SolverInterface solver : this.solverList) {
+
 			solver.sendSample(solverSample);
+
 		}
 	}
 

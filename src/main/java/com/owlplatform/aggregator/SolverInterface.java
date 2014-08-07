@@ -74,6 +74,11 @@ public abstract class SolverInterface {
 		}
 		return super.equals(o);
 	}
+	
+	@Override
+	public int hashCode(){
+		return this.session.hashCode();
+	}
 
 	public boolean equals(SolverInterface solver) {
 		return this.session.equals(solver.session);
