@@ -22,9 +22,13 @@ if [ ! -e $SRC_JAR_DIR/$SRC_JAR_FILE ]; then
   echo "Compiling aggregator using Apache Maven"
   mv "$LOG4J_DEV_FILE" "$LOG4J_DEV_FILE.bkp" && \
   cp "$LOG4J_FILE" "$LOG4J_DEV_FILE" && \
-  mvn clean package >/dev/null && \
-  mv "$LOG4J_DEV_FILE.bkp" "$LOG4J_DEV_FILE" || 
-  echo "Unable to compile the aggregator."
+  mvn clean package >/dev/null
+  if [[ $? -ne 0 ]]; then
+    echo "Unable to build the aggregator. Aborting installation."
+    exit 1
+  else
+    mv "$LOG4J_DEV_FILE.bkp" "$LOG4J_DEV_FILE"
+  fi
 fi
 
 # Create user if it doesn't exist
@@ -45,4 +49,6 @@ sudo update-rc.d owl-aggregator defaults
 
 sudo service owl-aggregator restart
 
-echo "Installation complete."
+echo "Installation complete and the aggregator is running."
+echo "Aggregator configuration is in $INSTALL_DIR/$DST_CONTROL_SCRIPT"
+echo "Run 'sudo service owl-aggregator stop' to stop the aggregator."
